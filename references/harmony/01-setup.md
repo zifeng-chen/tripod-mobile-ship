@@ -72,3 +72,24 @@ hvigorw --mode module -p product=default -p buildMode=release assembleHap --no-d
 hdc shell bm dump -n <bundle> | head -20     # 版本/权限
 hdc shell uitest dumpLayout -p /data/local/tmp/l.json   # 控件树（含 bounds）
 ```
+
+## 7. 构建机卫生（磁盘）
+
+鸿蒙构建产物 + 录屏中间件很容易堆到几个 G。约定：**每次出包后清掉可再生的东西**。
+
+```bash
+bash scripts/mac_clean.sh          # 项目构建产物 + /tmp 中间件
+bash scripts/mac_clean.sh --deep   # 再加 ~/.gradle/caches、Xcode DerivedData
+bash scripts/mac_clean.sh --dry    # 只看会删什么
+```
+
+永远保留：`.certs/`、`build-profile.json5`、`~/.ohos/config`（签名口令的加密密钥）、
+`~/.Huawei`（模拟器镜像，删了要重下几个 G）、`.env`。
+
+两个项目脚本已经内置自清理：
+
+- `build_app_mac.sh`：签名验完后删 `/tmp/appkit` 与未签名 `.app`；`PRUNE=all` 连 `entry/build` 一起删
+- `record_demo_mac.sh`：合成完删本地帧、设备端 `/data/local/tmp/vid`
+
+连拍录屏每个镜头大约 100~200 MB（`/tmp/vidN.tar`），录五六次就是 1 G——
+这是最容易忘记的隐形占用。
