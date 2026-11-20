@@ -40,6 +40,9 @@
 
 | 症状 | 原因 | 改法 |
 |---|---|---|
+| 改了代码，装上界面没变 | ① `assembleHap` 判 UP-TO-DATE 没重签；② `hdc install -r` 覆盖失败但报成功 | 先 `bm dump -n <包>` 核对 versionName；固化流程：`bm uninstall` → `install`（覆盖安装不可靠，直接卸载重装最稳） |
+| 系统启动窗口一闪是白屏 | `startWindowBackground` 指到浅色 `app_bg`，图标还是带底色的方图 | 底色换成品牌深色（单独定义 `start_bg`，base/dark 同值），图标用**透明底**的白色字形；页内启动页复用同一张图，交接不跳色 |
+| 启动页卡死、只能杀进程 | boot 里 `await` 的某一步（preferences / 网络探测）不返回，`splash=false` 永远执行不到 | 加看门狗：`setTimeout(() => { if (this.splash) { this.splash = false } }, 4000)`；iOS 同理在 `SplashView` 里 4 秒后 `finishOnce()`，并用 `finished` 标志防重复收尾 |
 | 对比度 1.03（Text） | 透明画布图标被当文本取色 | 图标改矢量资源 |
 | Canvas 锯齿 94.67 | 自绘细线边缘不干净 | 同上 |
 | 提审报 `SelfTestVideos json format is incorrect` | 传了数组 | 传字符串 `"{\"objectIds\":[…]}"` |
